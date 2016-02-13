@@ -18,9 +18,7 @@ int main(int argc, char *argv[])
 
     // Declaration of initial variables:
     char *outfilename;
-
-    // determine how many times the loop will run
-    int n = argc-1;
+    int n;
 
     // Read in output file and n,
     // abort if there are too few command-line arguments:
@@ -31,11 +29,19 @@ int main(int argc, char *argv[])
     }
     else{
       outfilename = argv[1]; // first command line argument.
-      n = atoi(argv[2]);  // second command line argument.
+      n = atoi(argv[2])-1;  // second command line argument.
     }
 
-    //set size of vectors
+    //Vectors making up the tridiagonal matrix A
+    //Zeroth element included to make indexing easy
     vec a(n+1); vec b(n+1); vec c(n+1);
+
+    //Temporary element needed for Gaussian elimination
+    vec dTemp(n+1);
+
+    //Constants within the problem
+    double h = 1.0/(n+1.0);
+    vec x(n+2)
 
     //initialize vector components of matrix to be solved
     for (int i = 1; i<= n; i++)
@@ -47,10 +53,6 @@ int main(int argc, char *argv[])
 
     a(1) = 0;
     c(n) = 0;
-
-
-    //initialize vector of unknown variables
-    vec x(n+1); x.zeros(n+1);
 
     //initialize right side of equation
     vec w(n+1);
@@ -84,6 +86,7 @@ int main(int argc, char *argv[])
     w.print("Vector w: ");
     x.print("Answer x:");
     u.print("Answer u: ")
+
     return 0;
 
 
