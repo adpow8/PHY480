@@ -4,6 +4,10 @@
 using namespace arma;
 using namespace std;
 
+double Solution(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
+
+double f(double x) {return 100*exp(-10*x);}
+
 int main(int argc, char *argv[])
 {
     /*
@@ -12,44 +16,75 @@ int main(int argc, char *argv[])
      when A is a tridiagonal matrix.
     */
 
-    mat A; mat L; mat U;
-    /*initialize Matrix to be solved*/
-    A << 2 << 1 << 0 << 0 << endr
-      << 1 << 2 << 1 << 0 << endr
-      << 0 << 1 << 2 << 1 << endr
-      << 0 << 0 << 1 << 2 << endr;
-    /*initialize vector of unknown variables*/
-    vec x(4); x.zeros(4);
+    // Declaration of initial variables:
+    char *outfilename;
 
-    /*initialize right side of equation*/
-    vec w(4); w.randu(4);
+    // determine how many times the loop will run
+    int n = argc-1;
 
-    /* performs L-U decomposition of matrix A*/
-    lu(L, U, A);
-
-    /*determine how many times the loop will run*/
-    int n = x.n_rows;
-
-    /*initialize place holder (y-vector) for Lower Matrix forward substitution*/
-    vec y(n);
-    y(1) = w(1);
-
-    /*fill in the rest of the y-vector*/
-    for (int i = 2; i <= n; i++)
-    {
-        y(i) = w(i) - L(i,i-1)*y(i-1);
+    // Read in output file and n,
+    // abort if there are too few command-line arguments:
+    if( argc <= 2 ){
+      cout << "Bad Usage: " << argv[0] <<
+          " read also output file and n (int) on same line" << endl;
+      exit(1);
+    }
+    else{
+      outfilename = argv[1]; // first command line argument.
+      n = atoi(argv[2]);  // second command line argument.
     }
 
-    /*fill in x-vector*/
+    //set size of vectors
+    vec a(n+1); vec b(n+1); vec c(n+1);
+
+    //initialize vector components of matrix to be solved
+    for (int i = 1; i<= n; i++)
+    {
+        a(i) = 1;
+        b(i) = 2;
+        c(i) = 1;
+    }
+
+    a(1) = 0;
+    c(n) = 0;
+
+
+    //initialize vector of unknown variables
+    vec x(n+1); x.zeros(n+1);
+
+    //initialize right side of equation
+    vec w(n+1);
+
+    for (int i = 1; i <= n; i++)
+    {
+        w(i) = _________________;
+
+    }
+
+
+    //initialize place holder (y-vector) for Lower Matrix forward substitution
+    vec y(n+1);
+    y(0) = 0;
+    w(0) = 0;
+
+    //fill in the rest of the y-vector
+    for (int i = 1; i <= n; i++)
+    {
+        y(i) = w(i) - a(i)*y(i);
+    }
+
+    //fill in x-vector
     x(n) = y(n);
 
-    for (int j = n-1;j <= 1; j--)
+    for (int i = n; i >= 1; i--)
     {
-         x(j) = (y(j)-(U(j,j+1)*x(j+1)))/U(j,j);
+         x(i) = ( y(i) - c(n)*x(n+1) ) / b(n);
     }
 
-    A.print("Matrix A");
-    w.print("Vector w");
+    w.print("Vector w: ");
     x.print("Answer x:");
+    u.print("Answer u: ")
     return 0;
+
+
 }
