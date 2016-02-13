@@ -1,10 +1,14 @@
 #include <iostream>
+# include <fstream>
+# include <iomanip>
+# include <cmath>
 #include "armadillo"
 
 using namespace arma;
 using namespace std;
+ofstream ofile;
 
-double Solution(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
+double Real(double x) {return 1.0-(1-exp(-10))*x-exp(-10*x);}
 
 double f(double x) {return 100*exp(-10*x);}
 
@@ -41,11 +45,37 @@ int main(int argc, char *argv[])
 
     //Constants within the problem
     double h = 1.0/(n+1.0);
-    vec x(n+2)
+    vec x(n+2);
+    vec bTwi(n+1);
+
+    bTwi(0) = 0;
+
+    //initialize real solution and approximated solution:
+    vec u(n+2); //Analytical solution
+    vec v(n+2); //Numerical solution
+
+    //Make indexing easy
+    vec u(0) = 0;
+    vec v(0) = 0;
+
+    //Fill up x-vector
+    for (int i = 0; i <= n+1; i++)
+    {
+        x(i) = i*h;
+        // Could print results to check:
+        //cout << "x = " << x[i] << " and " << "h^2*f(x) = " << h*h*f(x[i]) << endl;
+    }
 
     //initialize vector components of matrix to be solved
     for (int i = 1; i<= n; i++)
     {
+        bTwi(i) = h * h * f( x(i) );
+        // Could print here to check:
+        //cout << "b_twidd = " << b_twidd[i] << "for x = " << x[i] << endl;
+
+        u(i) = Real(x(i));
+        //cout << "u = " << u[i] << " for x = " << x[i] <<  endl;
+
         a(i) = 1;
         b(i) = 2;
         c(i) = 1;
@@ -54,38 +84,47 @@ int main(int argc, char *argv[])
     a(1) = 0;
     c(n) = 0;
 
-    //initialize right side of equation
-    vec w(n+1);
+    //Algorithm for finding v:
+    // a(i)*v(i-1) + b(i)*v(i) + c(i)*v(i+1) = b_twidd(i)
+    // Row reduction; forward substitution:
 
-    for (int i = 1; i <= n; i++)
+    double bTemp = b(1);
+    v(1) = bTwi(1) / bTemp;
+    for (int i = 2; i <= n; i++)
     {
-        w(i) = _________________;
-
+        //Temporary value needed in next loop
+        dTemp(i) = c(i-1) / bTemp;
+        //Temporary diagonal element
+        bTemp = b(i) - a(i)*dTemp(i);
+        // Update right hand side of equation
+        v(i) = (bTwi(i) - v(i-1) * a(i)) / bTemp;
     }
 
-
-    //initialize place holder (y-vector) for Lower Matrix forward substitution
-    vec y(n+1);
-    y(0) = 0;
-    w(0) = 0;
-
-    //fill in the rest of the y-vector
-    for (int i = 1; i <= n; i++)
+    // Row reduction backward substitution:
+    for (int i = n-1; i >= 1; i--)
     {
-        y(i) = w(i) - a(i)*y(i);
+        v(i) -= dTemp(i+1) * v(i+1);
     }
 
-    //fill in x-vector
-    x(n) = y(n);
-
-    for (int i = n; i >= 1; i--)
-    {
-         x(i) = ( y(i) - c(n)*x(n+1) ) / b(n);
+    // Open file and write results to file:
+    ofile.open(outfilename);
+    ofile << setiosflags(ios::showpoint | ios::uppercase);
+    ofile << "       x:             u(x):          v(x):  " << endl;
+    for (int i=1;i<=n;i++) {
+       ofile << setw(15) << setprecision(8) << x(i);
+       ofile << setw(15) << setprecision(8) << u(i);
+       ofile << setw(15) << setprecision(8) << v(i) << endl;
     }
+    ofile.close();
 
-    w.print("Vector w: ");
-    x.print("Answer x:");
-    u.print("Answer u: ")
+    delete [] x;
+    delete [] b_twidd;
+    delete [] a;
+    delete [] b;
+    delete [] c;
+    delete [] u;
+    delete [] v;
+
 
     return 0;
 
