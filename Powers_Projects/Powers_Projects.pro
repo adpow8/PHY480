@@ -8,6 +8,7 @@ LIBS += -L/usr/local/lib
 
 SOURCES += \
     Project_1.cpp \
-    ../../../Downloads/project1.cpp
+    ../../../Downloads/project1.cpp \
+    project_2.cpp
 
 LIBS += -larmadillo -llapack -lblas
